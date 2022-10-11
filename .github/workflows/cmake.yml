@@ -1,0 +1,30 @@
+name: CMake
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    name: "Build"
+    runs-on: ubuntu-22.04
+
+    env:
+      CC: clang-16
+      CXX: clang++-16
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Add LLVM repos
+        run: |
+          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+          sudo add-apt-repository 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy main'
+          sudo apt update
+      - name: Install LLVM, Clang 16
+        run: sudo apt install llvm-16 clang-16
+
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_SYSTEM_PREFIX_PATH=~/lib
+
+      - name: Build
+        run: cmake --build build --config ${{env.BUILD_TYPE}}
+
